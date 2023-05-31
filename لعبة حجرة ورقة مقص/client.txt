@@ -1,0 +1,48 @@
+import socket
+import tkinter as tk
+
+# إعداد واجهة المستخدم
+root = tk.Tk()
+root.title("لعبة حجر ورقة مقص - العميل")
+
+# إنشاء متغيرات
+player_choice = None
+
+# تحديد إجراء عند النقر على زر اللاعب
+def player_choice_handler(choice):
+    global player_choice
+    player_choice = choice
+    root.quit()
+
+# إنشاء أزرار اللاعب
+rock_button = tk.Button(root, text="حجر", command=lambda: player_choice_handler("rock"))
+rock_button.pack()
+
+paper_button = tk.Button(root, text="ورقة", command=lambda: player_choice_handler("paper"))
+paper_button.pack()
+
+scissors_button = tk.Button(root, text="مقص", command=lambda: player_choice_handler("scissors"))
+scissors_button.pack()
+
+root.mainloop()
+
+# إعداد اتصال Socket
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect(('127.0.0.1', 9999))
+
+# إرسال خيار اللاعب إلى الخادم
+client_socket.send(player_choice.encode())
+
+# استلام اختيار الخادم
+server_choice = client_socket.recv(1024).decode()
+
+# إظهار نتائج اللعبة
+result_text = tk.Text(root)
+result_text.insert(tk.END, "اختيارك: {}\n".format(player_choice))
+result_text.insert(tk.END, "اختيار الخادم: {}\n".format(server_choice))
+result_text.pack()
+
+root.mainloop()
+
+# إغلاق الاتصال
+client_socket.close()
